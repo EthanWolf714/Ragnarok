@@ -17,7 +17,7 @@ bool init();
 bool initGL();
 
 //Input Handler
-void handleKeys(unsigned char key, int x, int y);
+void handleKeys(unsigned char key);
 
 //Update function
 void update();
@@ -56,7 +56,7 @@ bool init()
 
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
-		SDL_Log("SDL could not initialize! SDL Error: %s\n", SDL_GetError);
+		SDL_Log("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
 	}
 	else
 	{
@@ -69,7 +69,7 @@ bool init()
 		gWindow = SDL_CreateWindow("Ragnarok Engine", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
 		if (gWindow == NULL)
 		{
-			SDL_Log("Window coult not be created! SDL Error: %s\n", SDL_GetError);
+			SDL_Log("Window coult not be created! SDL Error: %s\n", SDL_GetError());
 		}
 		else 
 		{
@@ -172,7 +172,7 @@ bool initGL()
 		{
 			printf("Unable to compile fragment shader %d!/n", fragmentShader);
 			printShaderLog(fragmentShader);
-			success = true;
+			success = false;
 		}
 		else
 		{
@@ -224,7 +224,7 @@ bool initGL()
 
 					//create IBO
 					glGenBuffers(1, &gIBO);
-					glBindBuffer(GL_ARRAY_BUFFER, gIBO);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
 					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indexData, GL_STATIC_DRAW);
 				}
 			}
@@ -235,14 +235,190 @@ bool initGL()
 	return success;
 }
 
-void printProgramLog()
+void handleKeys(unsigned char key)
+{
+	//toggle quad
+	if (key == 'q');
+	{
+		gRenderQuad = !gRenderQuad;
+	}
+}
+
+void update()
 {
 
 }
 
+void render()
+{
+	//clear color buffer
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	//Render quad
+	if (gRenderQuad)
+	{
+		//bind program
+		glUseProgram(gProgramID);
+
+		//endable vertex position
+		glEnableVertexAttribArray(gVertexPos2DLocation);
+
+		//set vertex data
+		glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+		glVertexAttribPointer(gVertexPos2DLocation, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
+
+		//set index data and render
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
+		glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL);
+
+		//disbale vertex position
+		glDisableVertexAttribArray(gVertexPos2DLocation);
+
+		glUseProgram(0);
+	}
+}
+
+void close()
+{
+	//Deallocate program
+	glDeleteProgram(gProgramID);
+
+	//destroy window
+	SDL_DestroyWindow(gWindow);
+	gWindow = NULL;
+
+	//quit sdl
+
+	SDL_Quit();
+}
+
+void printProgramLog(GLuint program)
+{
+	//make sure name is shader
+	if (glIsProgram(program))
+	{
+		//program log length
+		int infoLogLength = 0;
+		int maxLength = infoLogLength;
+
+		//get info string length
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, & maxLength);
+
+		//Allocate string
+		char* infoLog = new char[maxLength];
+
+		//get info log
+		glGetProgramInfoLog(program, maxLength, &infoLogLength, infoLog);
+		if (infoLogLength > 0)
+		{
+			//print log
+			printf("%s\n", infoLog);
+
+		}
+
+		//Deallocate string
+		delete[] infoLog;
+
+
+	}
+	else 
+	{
+		printf("Name %d is not a program\n", program);
+
+	}
+}
+
+void printShaderLog(GLuint shader)
+{
+	//Make sure name is shader
+	if (glIsShader(shader))
+	{
+		//Shader log length
+		int infoLogLength = 0;
+		int maxLength = infoLogLength;
+
+		//Get info string length
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		//Allocate string
+		char* infoLog = new char[maxLength];
+
+		//Get info log
+		glGetShaderInfoLog(shader, maxLength, &infoLogLength, infoLog);
+		if (infoLogLength > 0)
+		{
+			//Print Log
+			printf("%s\n", infoLog);
+		}
+
+		//Deallocate string
+		delete[] infoLog;
+	}
+	else
+	{
+		printf("Name %d is not a shader\n", shader);
+	}
+}
+
+
+
+
+
+
+
+
+
 int main(int argc, char* argv[]) 
 {
+	//start SDL
+	if (!init())
+	{
+		SDL_Log("Failed to initialize!\n");
 
+	}
+	else 
+	{
+		//main loop flag
+		bool quit = false;
+
+		//event handler;
+		SDL_Event e;
+
+		//enable text input
+		SDL_StartTextInput(gWindow);
+
+		//while application is runnnig
+		while (!quit)
+		{
+			//handle events 
+			while (SDL_PollEvent(&e) != 0)
+			{
+				//user requests quit
+				if (e.type == SDL_EVENT_QUIT)
+				{
+					quit = true;
+				}
+				//handle key press
+				else if(e.type == SDL_EVENT_TEXT_INPUT)
+				{
+					handleKeys(e.text.text[0]);
+				}
+			}
+
+			//render quad
+			render();
+
+			//update screen
+			SDL_GL_SwapWindow(gWindow);
+
+		}
+		
+		//disable text inpuit
+		SDL_StopTextInput(gWindow);
+	
+	}
+	//free resources
+	close();
 
 	return 0;
 }
