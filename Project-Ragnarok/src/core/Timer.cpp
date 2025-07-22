@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include <SDL3/SDL.h>
 
 Timer:: Timer()
 	: currentTicks(0), previousTicks(0), deltaTime(0.0f) {

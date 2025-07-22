@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glm-1.0.1-light\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glm-1.0.1-light\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -102,12 +108,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\include;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\include;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\include;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glm-1.0.1-light;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\lib\x64;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\lib\x64;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\lib\Release\x64;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glm;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;opengl32.lib;glu32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -119,27 +125,33 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\include;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\include;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\include;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glm-1.0.1-light;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\lib\x64;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\SDL3-3.2.16\lib\x64;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glew-2.1.0-win32\glew-2.1.0\lib\Release\x64;C:\Users\Emwol\source\repos\Project-Ragnarok\vclib\glm;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;opengl32.lib;glu32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\graphics\Renderer.cpp" />
+    <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\core\Application.cpp" />
     <ClCompile Include="src\core\Engine.cpp" />
     <ClCompile Include="src\core\Input.cpp" />
     <ClCompile Include="src\core\Timer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\graphics\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\Renderer.h" />
+    <ClInclude Include="src\graphics\camera.h" />
     <ClInclude Include="src\core\Application.h" />
     <ClInclude Include="src\core\Engine.h" />
     <ClInclude Include="src\core\Input.h" />
     <ClInclude Include="src\core\Timer.h" />
+    <ClInclude Include="src\graphics\Texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
