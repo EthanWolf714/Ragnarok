@@ -11,6 +11,7 @@ Renderer::~Renderer() {
 
 void Renderer::Render()
 {
+    glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	DrawTile();
 
@@ -18,10 +19,11 @@ void Renderer::Render()
 
 }
 
-bool Renderer::Initialize()
+void Renderer::SetUpTile()
 {
-    //Success flag
-    bool success = true;
+    if (tileInitialized) return;
+
+   
 
     //Generate program
     gProgramID = glCreateProgram();
@@ -48,7 +50,7 @@ bool Renderer::Initialize()
     {
         SDL_Log("Unable to compile vertex shader %d!\n", vertexShader);
         printShaderLog(vertexShader);
-        success = false;
+        
     }
     else
     {
@@ -77,7 +79,6 @@ bool Renderer::Initialize()
         {
             SDL_Log("Unable to compile fragment shader %d!\n", fragmentShader);
             printShaderLog(fragmentShader);
-            success = false;
         }
         else
         {
@@ -94,7 +95,6 @@ bool Renderer::Initialize()
             {
                 SDL_Log("Error linking program %d!\n", gProgramID);
                 printProgramLog(gProgramID);
-                success = false;
             }
             else
             {
@@ -103,7 +103,7 @@ bool Renderer::Initialize()
                 if (gVertexPos2DLocation == -1)
                 {
                     SDL_Log("LVertexPos2D is not a valid glsl program variable!\n");
-                    success = false;
+                   
                 }
                 else
                 {
@@ -113,10 +113,10 @@ bool Renderer::Initialize()
                     //VBO data
                     GLfloat vertexData[] =
                     {
-                        -0.5f, -0.5f,
-                         0.5f, -0.5f,
-                         0.5f,  0.5f,
-                        -0.5f,  0.5f
+                        -0.5f, -0.5f,//bottom left
+                         0.5f, -0.5f,// bottom right
+                         0.5f,  0.5f,// top right
+                        -0.5f,  0.5f// top left
                     };
 
                     //IBO data
@@ -136,14 +136,54 @@ bool Renderer::Initialize()
         }
     }
 
-    return success;
+    tileInitialized = true;
+}
+
+bool Renderer::Initialize()
+{
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+
+    // If you have nothing else to initialize, just return true
+    return true;
+
+    
 }
 
 void Renderer::DrawTile()
 {
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+    double dist = sqrt(1 / 3.0);
+
+    gluLookAt(dist, dist, dist,  /* position of camera */
+        0.0, 0.0, 0.0,   /* where camera is pointing at */
+        0.0, 1.0, 0.0);  /* which direction is up */
+
+	glMatrixMode(GL_MODELVIEW);
+
+    glBegin(GL_LINES);
+
+    glColor3d(1.0, 0.0, 0.0);
+    glVertex3d(0.0, 0.0, 0.0);
+    glVertex3d(1.0, 0.0, 0.0);
+
+    glColor3d(0.0, 1.0, 0.0);
+    glVertex3d(0.0, 0.0, 0.0);
+    glVertex3d(0.0, 1.0, 0.0);
+
+    glColor3d(0.0, 0.0, 1.0);
+    glVertex3d(0.0, 0.0, 0.0);
+    glVertex3d(0.0, 0.0, 1.0);
+
+    glEnd();
+
+    glFlush();
+
+    SetUpTile();
 	
     glUseProgram(gProgramID);
-
 	glEnableVertexAttribArray(gVertexPos2DLocation);
 
 

@@ -25,4 +25,7 @@ private:
     GLint gVertexPos2DLocation = -1;
     GLuint gVBO = 0;
     GLuint gIBO = 0;
+    void SetUpTile();
+    bool tileInitialized = false;
+   
 };
