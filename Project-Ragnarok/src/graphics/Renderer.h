@@ -1,5 +1,6 @@
 #pragma once  
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
 #include "Texture.h"
@@ -27,5 +28,6 @@ private:
     GLuint gIBO = 0;
     void SetUpTile();
     bool tileInitialized = false;
+    float rotation = 0.0f;
    
 };

@@ -1,4 +1,6 @@
 #include "Renderer.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 
 Renderer::Renderer() 
@@ -9,6 +11,7 @@ Renderer::Renderer()
 Renderer::~Renderer() {
 }
 
+//Renders the screen
 void Renderer::Render()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -19,26 +22,29 @@ void Renderer::Render()
 
 }
 
+//sets up tile and shader program using open gl
 void Renderer::SetUpTile()
 {
     if (tileInitialized) return;
 
-   
+    // Generate program, compile and link shaders (load from files or use the above strings)
+	gProgramID = glCreateProgram();
 
-    //Generate program
-    gProgramID = glCreateProgram();
-
-    //Create vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); 
     //Get vertex source
     const GLchar* vertexShaderSource[] =
     {
-        "#version 140\nin vec2 LVertexPos2D; void main() { gl_Position = vec4( LVertexPos2D.x, LVertexPos2D.y, 0, 1 ); }"
+        "#version 140\n"
+        "uniform mat4 uMVP;"
+        "in vec3 LVertexPos3D;"
+        "void main() {"
+        "   gl_Position = uMVP * vec4(LVertexPos3D, 1.0);"
+        "}"
     };
 
+
     //Set vertex source
-    glShaderSource(vertexShader, 1, vertexShaderSource, NULL);
+   glShaderSource(vertexShader, 1, vertexShaderSource, NULL);
 
     //Compile vertex source
     glCompileShader(vertexShader);
@@ -63,7 +69,11 @@ void Renderer::SetUpTile()
         //Get fragment source
         const GLchar* fragmentShaderSource[] =
         {
-            "#version 140\nout vec4 LFragment; void main() { LFragment = vec4( 1.0, 1.0, 1.0, 1.0 ); }"
+            "#version 140\n"
+            "out vec4 LFragment;"
+            "void main() {"
+            "   LFragment = vec4(1.0, 1.0, 1.0, 1.0);"
+            "}"
         };
 
         //Set fragment source
@@ -98,47 +108,36 @@ void Renderer::SetUpTile()
             }
             else
             {
-                //Get vertex attribute location
-                gVertexPos2DLocation = glGetAttribLocation(gProgramID, "LVertexPos2D");
-                if (gVertexPos2DLocation == -1)
-                {
-                    SDL_Log("LVertexPos2D is not a valid glsl program variable!\n");
-                   
+                gVertexPos2DLocation = glGetAttribLocation(gProgramID, "LVertexPos3D");
+                if (gVertexPos2DLocation == -1) {
+                    SDL_Log("LVertexPos3D is not a valid glsl program variable!\n");
+                    return;
                 }
-                else
-                {
-                    //Initialize clear color
-                    glClearColor(0.f, 0.f, 0.f, 1.f);
 
-                    //VBO data
-                    GLfloat vertexData[] =
-                    {
-                        -0.5f, -0.5f,//bottom left
-                         0.5f, -0.5f,// bottom right
-                         0.5f,  0.5f,// top right
-                        -0.5f,  0.5f// top left
-                    };
+                // VBO data (unit quad)
+                GLfloat vertexData[] = {
+                    -0.5f, -0.5f, 0.0f, // bottom left
+                     0.5f, -0.5f, 0.0f, // bottom right
+                     0.5f,  0.5f, 0.0f, // top right
+                    -0.5f,  0.5f, 0.0f  // top left
+                };
+                GLuint indexData[] = { 0, 1, 2, 3 };
 
-                    //IBO data
-                    GLuint indexData[] = { 0, 1, 2, 3 };
+                glGenBuffers(1, &gVBO);
+                glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
-                    //Create VBO
-                    glGenBuffers(1, &gVBO);
-                    glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-                    glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
+                glGenBuffers(1, &gIBO);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
 
-                    //Create IBO
-                    glGenBuffers(1, &gIBO);
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indexData, GL_STATIC_DRAW);
-                }
+                tileInitialized = true;
             }
         }
     }
 
-    tileInitialized = true;
 }
-
+//don't exactly know what it does
 bool Renderer::Initialize()
 {
     glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -149,58 +148,42 @@ bool Renderer::Initialize()
     
 }
 
+//draws an isometric tile on the screen
 void Renderer::DrawTile()
 {
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-    double dist = sqrt(1 / 3.0);
-
-    gluLookAt(dist, dist, dist,  /* position of camera */
-        0.0, 0.0, 0.0,   /* where camera is pointing at */
-        0.0, 1.0, 0.0);  /* which direction is up */
-
-	glMatrixMode(GL_MODELVIEW);
-
-    glBegin(GL_LINES);
-
-    glColor3d(1.0, 0.0, 0.0);
-    glVertex3d(0.0, 0.0, 0.0);
-    glVertex3d(1.0, 0.0, 0.0);
-
-    glColor3d(0.0, 1.0, 0.0);
-    glVertex3d(0.0, 0.0, 0.0);
-    glVertex3d(0.0, 1.0, 0.0);
-
-    glColor3d(0.0, 0.0, 1.0);
-    glVertex3d(0.0, 0.0, 0.0);
-    glVertex3d(0.0, 0.0, 1.0);
-
-    glEnd();
-
-    glFlush();
-
     SetUpTile();
-	
+
+    //sets up orthographic projection
+    glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -4.0f, 4.0f, -10.0f, 10.0f);
+    //sets camera position
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.577f, 0.577f, 0.577f), // isometric camera position
+        glm::vec3(0.0f, 0.0f, 0.0f),       // look at origin
+        glm::vec3(0.0f, 1.0f, 0.0f)        // up vector
+    );
+    //Rotates the tile for iso view
+    glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0,0,1));
+    model = glm::rotate(model, glm::radians(35.264f), glm::vec3(1,0,0));
+    glm::mat4 mvp = proj * view * model;
+
+    // --- Use shader program and set uniform ---
     glUseProgram(gProgramID);
-	glEnableVertexAttribArray(gVertexPos2DLocation);
+    GLint mvpLoc = glGetUniformLocation(gProgramID, "uMVP");
+    glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);
 
-
-    //Set vertex data
+    // --- Bind VBO/IBO and set up attribute ---
     glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-    glVertexAttribPointer(gVertexPos2DLocation, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(gVertexPos2DLocation);
+    glVertexAttribPointer(gVertexPos2DLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
 
-    //Set index data and render
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
-    glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, nullptr);
 
-	glDisableVertexAttribArray(gVertexPos2DLocation);
-
-    //Unbind program
+    glDisableVertexAttribArray(gVertexPos2DLocation);
     glUseProgram(0);
 }
 
+//shader log
 void Renderer::printShaderLog(GLuint shader)
 {
     //Make sure name is shader
@@ -232,7 +215,7 @@ void Renderer::printShaderLog(GLuint shader)
         printf("Name %d is not a shader\n", shader);
     }
 }
-
+//program logs
 void Renderer::printProgramLog(GLuint program)
 {
     //Make sure name is shader

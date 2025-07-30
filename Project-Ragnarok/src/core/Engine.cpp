@@ -27,7 +27,7 @@ bool Engine::Initialize()
 
 	return true;
 }
-
+//function that handles SDL initialization
 bool Engine::InitSDL()
 {
 	bool success = true;
